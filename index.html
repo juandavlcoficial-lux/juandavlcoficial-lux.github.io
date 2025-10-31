@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luxe.ai Admin - Panel</title>
+    <title>Luxe.ai Admin - Panel v3 (Calendario)</title>
     
     <!-- Cargar la librería de Supabase: Forma UMD estable -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
+    <!-- 
+      ¡NUEVO! PASO 1: "IMPORTAR LOS PLANOS" DE FULLCALENDAR
+      (La "artillería pesada" para el calendario)
+    -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    
     <!-- Importar Fuente "Inter" -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +35,8 @@
         /* Contenedor principal que se muestra/oculta */
         .admin-container {
             width: 100%;
-            max-width: 400px;
+            /* ¡NUEVO! Más ancho para que quepa el calendario */
+            max-width: 900px; 
             padding: 40px;
             
             /* EFECTO GLASSMORPHISM */
@@ -44,168 +51,80 @@
         }
 
         /* --- ESTILOS DEL LOGIN --- */
-        #login-container h1 {
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 1.8rem;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        
-        #login-container p {
-            font-size: 1rem;
-            color: #a0a0c0;
-            margin-bottom: 30px;
-        }
-        
-        .input-field {
-            width: calc(100% - 36px); /* 100% - padding */
-            border: 1px solid rgba(255, 255, 255, 0.2); 
-            border-radius: 12px;
-            padding: 16px 18px; 
-            font-size: 1rem; 
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 20px;
-        }
-        
+        /* (Sin cambios, los pego para que esté completo) */
+        #login-container h1 { color: #ffffff; font-weight: 700; font-size: 1.8rem; margin-top: 0; margin-bottom: 15px; }
+        #login-container p { font-size: 1rem; color: #a0a0c0; margin-bottom: 30px; }
+        .input-field { width: calc(100% - 36px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
+            padding: 16px 18px; font-size: 1rem; background-color: rgba(255, 255, 255, 0.1); color: #ffffff;
+            font-family: 'Inter', sans-serif; margin-bottom: 20px; }
         .input-field::placeholder { color: #a0a0c0; }
+        .input-field:focus { outline: none; border-color: #00f5d4; box-shadow: 0 0 10px rgba(0, 245, 212, 0.3); }
+        .input-field:disabled { background-color: rgba(255, 255, 255, 0.05); color: #777; cursor: not-allowed; }
+        #login-button { width: 100%; padding: 16px 18px; background-color: #00f5d4; border: none; color: #1a1a2e; 
+            border-radius: 12px; cursor: pointer; text-align: center; font-size: 1rem; font-weight: 700; transition: all 0.2s ease; }
+        #login-button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 245, 212, 0.3); }
+        #login-button:disabled { background-color: #555; color: #999; cursor: not-allowed; transform: none; box-shadow: none; }
+        #message-box { font-size: 0.9rem; margin-top: 20px; padding: 10px; border-radius: 8px; display: none; }
+        #message-box.success { background-color: rgba(0, 245, 212, 0.1); color: #00f5d4; border: 1px solid #00f5d4; }
+        #message-box.error { background-color: rgba(255, 82, 82, 0.1); color: #ff5252; border: 1px solid #ff5252; }
+        .divider { font-size: 0.9rem; color: #a0a0c0; display: flex; align-items: center; text-align: center; margin: 25px 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .divider span { padding: 0 10px; }
+        #password-login-button { width: 100%; padding: 16px 18px; background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2); color: #777; border-radius: 12px; cursor: not-allowed; 
+            text-align: center; font-size: 1rem; font-weight: 700; }
         
-        .input-field:focus {
-            outline: none;
-            border-color: #00f5d4;
-            box-shadow: 0 0 10px rgba(0, 245, 212, 0.3);
-        }
-        
-        .input-field:disabled {
-             background-color: rgba(255, 255, 255, 0.05);
-             color: #777;
-             cursor: not-allowed;
-        }
-        
-        #login-button {
-            width: 100%;
-            padding: 16px 18px; 
-            background-color: #00f5d4;
-            border: none;
-            color: #1a1a2e; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            text-align: center;
-            font-size: 1rem; 
-            font-weight: 700;
-            transition: all 0.2s ease;
-        }
-        
-        #login-button:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 245, 212, 0.3);
-        }
-
-        #login-button:disabled {
-            background-color: #555;
-            color: #999;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        #message-box {
-            font-size: 0.9rem;
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 8px;
-            display: none; /* Oculto por defecto */
-        }
-        
-        #message-box.success {
-            background-color: rgba(0, 245, 212, 0.1);
-            color: #00f5d4;
-            border: 1px solid #00f5d4;
-        }
-        
-        #message-box.error {
-            background-color: rgba(255, 82, 82, 0.1);
-            color: #ff5252;
-            border: 1px solid #ff5252;
-        }
-        
-        /* NUEVO: Estilos para el separador */
-        .divider {
-            font-size: 0.9rem;
-            color: #a0a0c0;
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 25px 0;
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .divider span {
-            padding: 0 10px;
-        }
-
-        /* NUEVO: Estilos para el botón de pass (deshabilitado) */
-        #password-login-button {
-            width: 100%;
-            padding: 16px 18px; 
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #777; 
-            border-radius: 12px; 
-            cursor: not-allowed; 
-            text-align: center;
-            font-size: 1rem; 
-            font-weight: 700;
-        }
-
-        /* --- ESTILOS DEL DASHBOARD (NUEVO) --- */
-        #dashboard-container h1 {
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 1.8rem;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        #dashboard-container p {
-            font-size: 1rem;
-            color: #a0a0c0;
-            margin-bottom: 30px;
-        }
-        #user-email {
-            color: #00f5d4;
-            font-weight: 700;
-        }
+        /* --- ESTILOS DEL DASHBOARD --- */
+        #dashboard-container h1 { color: #ffffff; font-weight: 700; font-size: 1.8rem; margin-top: 0; margin-bottom: 15px; }
+        #dashboard-container p { font-size: 1rem; color: #a0a0c0; margin-bottom: 30px; }
+        #user-email { color: #00f5d4; font-weight: 700; }
         #logout-button {
             width: 100%;
+            max-width: 400px; /* ¡NUEVO! Para que no se estire a 900px */
+            margin: 30px auto 0 auto; /* ¡NUEVO! Centrado */
             padding: 16px 18px; 
-            background-color: transparent;
-            border: 1px solid #ff5252; /* Rojo para "peligro" */
-            color: #ff5252; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            text-align: center;
-            font-size: 1rem; 
-            font-weight: 700;
-            transition: all 0.2s ease;
+            background-color: transparent; border: 1px solid #ff5252; 
+            color: #ff5252; border-radius: 12px; cursor: pointer; 
+            text-align: center; font-size: 1rem; font-weight: 700; transition: all 0.2s ease;
         }
-        #logout-button:hover {
-            background-color: #ff5252;
-            color: #1a1a2e;
-            box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
-        }
+        #logout-button:hover { background-color: #ff5252; color: #1a1a2e; box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3); }
 
+        /* --- ¡NUEVO! ESTILOS PARA EL CALENDARIO --- */
+        #calendario-admin {
+            width: 100%;
+            margin-top: 30px;
+            /* ¡La clave para que se vea bien en tema oscuro! */
+            --fc-border-color: rgba(255, 255, 255, 0.1);
+            --fc-daygrid-event-dot-width: 8px;
+            --fc-list-event-dot-width: 8px;
+            --fc-event-bg-color: #00f5d4;
+            --fc-event-border-color: #00f5d4;
+            --fc-event-text-color: #1a1a2e;
+            --fc-button-bg-color: #2a2a4e;
+            --fc-button-text-color: #f0f0f0;
+            --fc-button-border-color: #00f5d4;
+            --fc-button-hover-bg-color: #00f5d4;
+            --fc-button-hover-text-color: #1a1a2e;
+            --fc-button-active-bg-color: #00f5d4;
+            --fc-button-active-text-color: #1a1a2e;
+            --fc-today-bg-color: rgba(0, 245, 212, 0.1);
+        }
+        /* Color del texto de los días (Ej: "Lun", "Mar") y los números */
+        .fc .fc-col-header-cell-cushion,
+        .fc .fc-daygrid-day-number {
+            color: #f0f0f0;
+            text-decoration: none;
+        }
+        .fc .fc-day-other .fc-daygrid-day-number {
+             color: #555; /* Días de otros meses */
+        }
         
     </style>
 </head>
 <body>
 
     <!-- Contenedor del Login (Puerta) -->
-    <div id="login-container" class="admin-container" style="display: none;"> <!-- Oculto por defecto, el JS decide -->
+    <div id="login-container" class="admin-container" style="display: none;">
         <h1>Panel de Control</h1>
         <p>Introduce tu email para recibir un enlace de acceso seguro.</p>
         
@@ -217,12 +136,9 @@
         
         <div id="message-box"></div>
         
-        <!-- NUEVO: Separador -->
-        <div class="divider">
-            <span>o</span>
-        </div>
+        <div class="divider"><span>o</span></div>
         
-        <!-- NUEVO: Formulario 2: Contraseña (No funcional) -->
+        <!-- Formulario 2: Contraseña (No funcional) -->
         <form id="login-form-password">
             <input type="email" id="email-input-pass" class="input-field" placeholder="tu-email@dominio.com" disabled>
             <input type="password" id="password-input" class="input-field" placeholder="Contraseña" disabled>
@@ -234,16 +150,19 @@
     </div>
     
     <!-- Contenedor del Dashboard (La Oficina) -->
-    <div id="dashboard-container" class="admin-container" style="display: none;"> <!-- Oculto por defecto -->
+    <div id="dashboard-container" class="admin-container" style="display: none;">
         <h1>¡Bienvenido, Rey!</h1>
         <p>Has iniciado sesión como:<br><span id="user-email">cargando...</span></p>
         
         <div style="margin: 30px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
         
-        <!-- Aquí irá el calendario y las citas -->
-        <p style="color: #555;">(Próximamente: Aquí va el calendario tocho)</p>
-        
-        <div style="margin: 30px 0;"></div>
+        <!-- 
+          ¡NUEVO! PASO 2: "HACER EL HUECO" PARA EL CALENDARIO
+          (El texto de "Próximamente" se va a la mierda)
+        -->
+        <div id="calendario-admin">
+            <!-- FullCalendar aparecerá aquí -->
+        </div>
         
         <button id="logout-button">Cerrar Sesión</button>
     </div>
@@ -265,41 +184,35 @@
             // --- Elementos del DOM ---
             const loginContainer = document.getElementById('login-container');
             const dashboardContainer = document.getElementById('dashboard-container');
-            
-            // Formulario Magic Link
             const loginForm = document.getElementById('login-form-magiclink');
             const emailInput = document.getElementById('email-input');
             const loginButton = document.getElementById('login-button');
             const messageBox = document.getElementById('message-box');
-            
-            // Dashboard
             const userEmail = document.getElementById('user-email');
             const logoutButton = document.getElementById('logout-button');
+            
+            // ¡NUEVO! El "hueco" del calendario
+            const calendarEl = document.getElementById('calendario-admin');
+            let adminCalendar = null; // Variable para guardar el calendario
 
             // --- Función para mostrar mensajes (solo en login) ---
             function showMessage(message, type = 'success') {
                 messageBox.textContent = message;
-                messageBox.className = type; // 'success' o 'error'
+                messageBox.className = type; 
                 messageBox.style.display = 'block';
             }
 
             // --- Inicialización ---
             try {
-                if (typeof supabase === 'undefined' || !supabase.createClient) {
-                    throw new Error("Librería de Supabase no cargada.");
-                }
-                if (supabaseUrl.includes('PEGA_AQUI')) {
-                    throw new Error("No has pegado tu URL de Supabase.");
-                }
+                if (typeof supabase === 'undefined' || !supabase.createClient) { throw new Error("Supabase no cargado."); }
+                if (supabaseUrl.includes('PEGA_AQUI')) { throw new Error("Pega tu URL de Supabase."); }
                 supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-                console.log('Cliente Supabase OK para Admin v2.');
-                
+                console.log('[DEBUG v3] Cliente Supabase OK.');
             } catch (err) { 
-                console.error("Error crítico Supabase:", err);
-                // Si falla la BBDD, mostrar el login con un error fatal
-                loginContainer.style.display = 'block'; 
-                showMessage(`Error fatal: ${err.message}`, 'error');
-                if (loginButton) loginButton.disabled = true;
+                 console.error("[DEBUG v3] Error crítico Supabase:", err);
+                 if(loginContainer) loginContainer.style.display = 'block'; 
+                 showMessage(`Error fatal: ${err.message}`, 'error');
+                 if (loginButton) loginButton.disabled = true;
             }
 
             // --- 1. Manejador del Login (Magic Link) ---
@@ -307,31 +220,20 @@
                 loginForm.addEventListener('submit', async (e) => {
                     e.preventDefault(); 
                     if (!supabaseClient) return;
-
                     const email = emailInput.value.trim();
-                    if (!email) {
-                        showMessage('Por favor, introduce un email.', 'error');
-                        return;
-                    }
-
-                    loginButton.disabled = true;
-                    loginButton.textContent = 'Enviando...';
-                    messageBox.style.display = 'none';
-
+                    if (!email) { showMessage('Introduce un email.', 'error'); return; }
+                    loginButton.disabled = true; loginButton.textContent = 'Enviando...'; messageBox.style.display = 'none';
                     try {
-                        const { error } = await supabaseClient.auth.signInWithOtp({
-                            email: email,
-                        });
+                        console.log('[DEBUG v3] Enviando OTP para:', email);
+                        const { error } = await supabaseClient.auth.signInWithOtp({ email: email });
                         if (error) throw error; 
-                        showMessage('¡Éxito! Revisa tu bandeja de entrada (y spam) para el enlace mágico.', 'success');
+                        showMessage('¡Éxito! Revisa tu email (y spam) para el enlace mágico.', 'success');
                         emailInput.value = ''; 
-
                     } catch (error) {
-                        console.error('Error en signInWithOtp:', error);
-                        showMessage(`Error: ${error.message || 'No se pudo enviar el enlace.'}`, 'error');
+                        console.error('[DEBUG v3] Error en signInWithOtp:', error);
+                        showMessage(`Error: ${error.message || 'No se pudo enviar.'}`, 'error');
                     } finally {
-                        loginButton.disabled = false;
-                        loginButton.textContent = 'Enviar Enlace de Acceso';
+                        loginButton.disabled = false; loginButton.textContent = 'Enviar Enlace de Acceso';
                     }
                 });
             }
@@ -340,44 +242,82 @@
             if (logoutButton) {
                 logoutButton.addEventListener('click', async () => {
                     if (!supabaseClient) return;
-                    
-                    logoutButton.disabled = true;
-                    logoutButton.textContent = 'Saliendo...';
-                    
+                    logoutButton.disabled = true; logoutButton.textContent = 'Saliendo...';
                     const { error } = await supabaseClient.auth.signOut();
-                    
                     if (error) {
                         console.error('Error al cerrar sesión:', error);
-                        alert(`Error al salir: ${error.message}`); // Un simple alert por ahora
-                        logoutButton.disabled = false;
-                        logoutButton.textContent = 'Cerrar Sesión';
+                        alert(`Error al salir: ${error.message}`); 
+                        logoutButton.disabled = false; logoutButton.textContent = 'Cerrar Sesión';
                     }
-                    // Si el logout tiene éxito, el "portero" (onAuthStateChange) 
-                    // se activará automáticamente y mostrará el login.
+                    // onAuthStateChange se encargará de mostrar el login
                 });
             }
 
-            // --- 3. El "Portero" (onAuthStateChange - El Cerebro) ---
+            // --- ¡NUEVO! PASO 3: EL "INTERRUPTOR" DEL CALENDARIO ---
+            // Esta función "enciende" el calendario
+            function cargarCalendario(userId) {
+                console.log('[DEBUG v3] Cargando calendario para el jefe:', userId);
+                
+                // Si el calendario no existe O no está el "plano" (FullCalendar)
+                if (!calendarEl || typeof FullCalendar === 'undefined') {
+                    console.error('[DEBUG v3] ¡Fallo! No se encuentra #calendario-admin o FullCalendar.js');
+                    return;
+                }
+                
+                // Si ya hemos dibujado el calendario, no lo hagas otra vez
+                if (adminCalendar) {
+                    adminCalendar.render(); // Solo redibújalo
+                    return;
+                }
+
+                // ¡Aquí se crea la magia!
+                adminCalendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth', // Vista de mes
+                    locale: 'es', // ¡En Español!
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,listWeek'
+                    },
+                    events: [
+                        // De momento, metemos una cita "falsa" para ver que furula
+                        {
+                            title: '¡El Calendario Funciona!',
+                            start: new Date().toISOString().split('T')[0] // Hoy
+                        }
+                    ]
+                    // ¡PRÓXIMAMENTE! Aquí es donde le diremos:
+                    // events: async function() { 
+                    //    return await fetchCitasDeSupabase(userId);
+                    // }
+                });
+
+                adminCalendar.render(); // ¡Dibuja el calendario!
+            }
+
+
+            // --- 4. El "Portero" (onAuthStateChange - ¡ACTUALIZADO!) ---
             if (supabaseClient) {
                 supabaseClient.auth.onAuthStateChange((event, session) => {
-                    console.log('Evento de Auth:', event, session);
+                    console.log(`[DEBUG v3] Evento Auth Recibido: ${event}`, session);
                     
                     if (session && session.user) {
                         // --- ESTADO: LOGUEADO ---
-                        // El portero dice: "Adelante, jefe"
-                        console.log('Usuario logueado:', session.user.email);
+                        console.log('[DEBUG v3] ¡SESIÓN DETECTADA!', session.user.email);
                         loginContainer.style.display = 'none';
                         dashboardContainer.style.display = 'block';
                         
-                        // Rellenamos los datos del usuario
                         if (userEmail) {
                             userEmail.textContent = session.user.email;
                         }
                         
+                        // ¡¡¡AQUÍ!!!
+                        // ¡El "portero" llama al "interruptor" del calendario!
+                        cargarCalendario(session.user.id);
+                        
                     } else {
                         // --- ESTADO: NO LOGUEADO ---
-                        // El portero dice: "Enséñame la entrada"
-                        console.log('No hay sesión de usuario.');
+                        console.log('[DEBUG v3] NO hay sesión detectada.');
                         loginContainer.style.display = 'block';
                         dashboardContainer.style.display = 'none';
                     }
@@ -389,3 +329,4 @@
     </script>
 </body>
 </html>
+
