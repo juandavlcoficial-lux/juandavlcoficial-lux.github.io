@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luxe.ai Admin - v4 (Citas Reales!)</title>
+    <title>Luxe.ai Admin - v5 (Gestión Horarios)</title>
     
-    <!-- Cargar la librería de Supabase: Forma UMD estable -->
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-    <!-- 
-      "PLANOS" DE FULLCALENDAR
-    -->
+    <!-- FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     
-    <!-- Importar Fuente "Inter" -->
+    <!-- Fuente Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Mismos estilos que v3 */
+        /* (Estilos Body, Admin Container, Login...) */
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%);
@@ -33,8 +31,7 @@
             border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); text-align: center;
         }
         
-        /* --- ESTILOS DEL LOGIN --- */
-        /* (Sin cambios) */
+        /* --- ESTILOS DEL LOGIN (Sin cambios) --- */
         #login-container h1 { color: #ffffff; font-weight: 700; font-size: 1.8rem; margin-top: 0; margin-bottom: 15px; }
         #login-container p { font-size: 1rem; color: #a0a0c0; margin-bottom: 30px; }
         .input-field { width: calc(100% - 36px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
@@ -45,7 +42,6 @@
         .input-field:disabled { background-color: rgba(255, 255, 255, 0.05); color: #777; cursor: not-allowed; }
         #login-button { width: 100%; padding: 16px 18px; background-color: #00f5d4; border: none; color: #1a1a2e; 
             border-radius: 12px; cursor: pointer; text-align: center; font-size: 1rem; font-weight: 700; transition: all 0.2s ease; }
-        #login-button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 245, 212, 0.3); }
         #login-button:disabled { background-color: #555; color: #999; cursor: not-allowed; transform: none; box-shadow: none; }
         #message-box { font-size: 0.9rem; margin-top: 20px; padding: 10px; border-radius: 8px; display: none; }
         #message-box.success { background-color: rgba(0, 245, 212, 0.1); color: #00f5d4; border: 1px solid #00f5d4; }
@@ -57,8 +53,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2); color: #777; border-radius: 12px; cursor: not-allowed; 
             text-align: center; font-size: 1rem; font-weight: 700; }
         
-        /* --- ESTILOS DEL DASHBOARD --- */
-        /* (Sin cambios) */
+        /* --- ESTILOS DEL DASHBOARD (Sin cambios) --- */
         #dashboard-container h1 { color: #ffffff; font-weight: 700; font-size: 1.8rem; margin-top: 0; margin-bottom: 15px; }
         #dashboard-container p { font-size: 1rem; color: #a0a0c0; margin-bottom: 30px; }
         #user-email { color: #00f5d4; font-weight: 700; }
@@ -67,29 +62,91 @@
             cursor: pointer; text-align: center; font-size: 1rem; font-weight: 700; transition: all 0.2s ease; }
         #logout-button:hover { background-color: #ff5252; color: #1a1a2e; box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3); }
 
-        /* --- ESTILOS DEL CALENDARIO --- */
-        /* (Sin cambios) */
+        /* --- ESTILOS DEL CALENDARIO (Sin cambios) --- */
+        #calendario-admin { /* (igual que v4) */ }
+        .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: #f0f0f0; text-decoration: none; }
+        .fc .fc-day-other .fc-daygrid-day-number { color: #555; }
+        /* (todos los --fc-...) */
         #calendario-admin {
-            width: 100%;
-            margin-top: 30px;
+            width: 100%; margin-top: 30px;
             --fc-border-color: rgba(255, 255, 255, 0.1);
-            --fc-daygrid-event-dot-width: 8px;
-            --fc-list-event-dot-width: 8px;
-            --fc-event-bg-color: #00f5d4;
-            --fc-event-border-color: #00f5d4;
-            --fc-event-text-color: #1a1a2e;
-            --fc-button-bg-color: #2a2a4e;
-            --fc-button-text-color: #f0f0f0;
-            --fc-button-border-color: #00f5d4;
-            --fc-button-hover-bg-color: #00f5d4;
-            --fc-button-hover-text-color: #1a1a2e;
-            --fc-button-active-bg-color: #00f5d4;
-            --fc-button-active-text-color: #1a1a2e;
+            --fc-event-bg-color: #00f5d4; --fc-event-border-color: #00f5d4; --fc-event-text-color: #1a1a2e;
+            --fc-button-bg-color: #2a2a4e; --fc-button-text-color: #f0f0f0; --fc-button-border-color: #00f5d4;
+            --fc-button-hover-bg-color: #00f5d4; --fc-button-hover-text-color: #1a1a2e;
+            --fc-button-active-bg-color: #00f5d4; --fc-button-active-text-color: #1a1a2e;
             --fc-today-bg-color: rgba(0, 245, 212, 0.1);
         }
-        .fc .fc-col-header-cell-cushion,
-        .fc .fc-daygrid-day-number { color: #f0f0f0; text-decoration: none; }
-        .fc .fc-day-other .fc-daygrid-day-number { color: #555; }
+
+        /* * --- ¡NUEVO! ESTILOS PARA LA "SALA DE MÁQUINAS" (Gestión) ---
+         */
+        #gestion-container {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+        }
+        #gestion-container h2 {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .horarios-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr; /* Columna para etiqueta, columna para input */
+            gap: 15px;
+            align-items: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .horarios-grid label {
+            font-weight: 500;
+            color: #a0a0c0;
+            text-align: right;
+        }
+        .horario-input {
+            /* Reutilizamos el estilo de .input-field */
+            width: calc(100% - 36px); /* 100% - padding */
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            border-radius: 12px;
+            padding: 12px 18px; /* Un poco más pequeño */
+            font-size: 0.95rem; 
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        .horario-input:focus {
+            outline: none;
+            border-color: #00f5d4;
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.3);
+        }
+        #guardar-horarios-btn {
+            /* Reutilizamos el estilo de .login-button */
+            width: 100%;
+            max-width: 500px;
+            margin: 25px auto 0 auto;
+            display: block; /* Para que el margin: auto funcione */
+            padding: 16px 18px; 
+            background-color: #00f5d4;
+            border: none;
+            color: #1a1a2e; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            text-align: center;
+            font-size: 1rem; 
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+         #guardar-horarios-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 245, 212, 0.3);
+        }
+        #guardar-horarios-btn:disabled {
+             background-color: #555; color: #999;
+             cursor: not-allowed; transform: none; box-shadow: none;
+        }
         
     </style>
 </head>
@@ -100,6 +157,7 @@
         <h1>Panel de Control</h1>
         <p>Introduce tu email para recibir un enlace de acceso seguro.</p>
         
+        <!-- Formulario 1: Magic Link (Funcional) -->
         <form id="login-form-magiclink">
             <input type="email" id="email-input" class="input-field" placeholder="tu-email@dominio.com" required>
             <button type="submit" id="login-button">Enviar Enlace de Acceso</button>
@@ -107,8 +165,8 @@
         
         <div id="message-box"></div>
         
+        <!-- Formulario 2: Contraseña (No funcional) -->
         <div class="divider"><span>o</span></div>
-        
         <form id="login-form-password">
             <input type="email" id="email-input-pass" class="input-field" placeholder="tu-email@dominio.com" disabled>
             <input type="password" id="password-input" class="input-field" placeholder="Contraseña" disabled>
@@ -126,8 +184,46 @@
         
         <div style="margin: 30px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
         
+        <!-- El "Mueble" del Calendario -->
         <div id="calendario-admin">
             <!-- FullCalendar aparecerá aquí -->
+        </div>
+
+        <!-- 
+          ¡NUEVO! PASO 1: "EL MUEBLE" (HTML de la Sala de Máquinas)
+        -->
+        <div id="gestion-container">
+            <h2>Gestionar Mi Negocio</h2>
+            
+            <!-- Panel de Horarios -->
+            <div class="horarios-grid">
+                <label for="horario-lunes">Lunes:</label>
+                <input type="text" id="horario-lunes" class="horario-input" placeholder="ej: 10:00-19:00 o Cerrado">
+                
+                <label for="horario-martes">Martes:</label>
+                <input type="text" id="horario-martes" class="horario-input" placeholder="ej: 10:00-19:00 o Cerrado">
+                
+                <label for="horario-miercoles">Miércoles:</label>
+                <input type="text" id="horario-miercoles" class="horario-input" placeholder="ej: 10:00-19:00 o Cerrado">
+                
+                <label for="horario-jueves">Jueves:</label>
+                <input type="text" id="horario-jueves" class="horario-input" placeholder="ej: 10:00-19:00 o Cerrado">
+                
+                <label for="horario-viernes">Viernes:</label>
+                <input type="text" id="horario-viernes" class="horario-input" placeholder="ej: 10:00-19:00 o Cerrado">
+                
+                <label for="horario-sabado">Sábado:</label>
+                <input type="text" id="horario-sabado" class="horario-input" placeholder="ej: 10:00-19:00 o Cerrado">
+                
+                <label for="horario-domingo">Domingo:</label>
+                <input type="text" id="horario-domingo" class="horario-input" placeholder="ej: 10:00-19:00 o Cerrado">
+            </div>
+            
+            <button id="guardar-horarios-btn">Guardar Horarios</button>
+            <div id="message-box-horarios" class="message-box" style="display: none;"></div>
+            
+            <!-- (Aquí irá el panel de "Servicios" en el v6) -->
+            
         </div>
         
         <button id="logout-button">Cerrar Sesión</button>
@@ -139,11 +235,15 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // =================================================================
-            // === PEGA TUS CLAVES DE SUPABASE AQUÍ ===
+            // === ¡OJO! PEGA TUS CLAVES AQUÍ SI NO LO HAS HECHO ===
             // =================================================================
             const supabaseUrl = 'https://yutttnvtdmjavictfshi.supabase.co'; 
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1dHR0bnZ0ZG1qYXZpY3Rmc2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4Nzg3ODAsImV4cCI6MjA3NjQ1NDc4MH0.XYk79f3HGk9LBODR7KMVK33mPkGamfpKSXKW36RlT2A'; 
             // =================================================================
+            
+            // ¡OJO! ¡SEGUIMOS USANDO LA MAQUETA DEL NEGOCIO 3!
+            // Más tarde, esto lo sacaremos del login del jefe (Pilar 1, Tarea 3)
+            const MI_ID_DE_NEGOCIO_PILOTO = 3; 
 
             let supabaseClient = null;
 
@@ -159,136 +259,213 @@
             const calendarEl = document.getElementById('calendario-admin');
             let adminCalendar = null; 
 
-            // --- Función para mostrar mensajes (solo en login) ---
-            function showMessage(message, type = 'success') { /* (igual) */ }
+            // ¡NUEVO! DOM de la "Sala de Máquinas"
+            const inputLunes = document.getElementById('horario-lunes');
+            const inputMartes = document.getElementById('horario-martes');
+            const inputMiercoles = document.getElementById('horario-miercoles');
+            const inputJueves = document.getElementById('horario-jueves');
+            const inputViernes = document.getElementById('horario-viernes');
+            const inputSabado = document.getElementById('horario-sabado');
+            const inputDomingo = document.getElementById('horario-domingo');
+            const guardarHorariosBtn = document.getElementById('guardar-horarios-btn');
+            const messageBoxHorarios = document.getElementById('message-box-horarios');
+
+
+            // --- Función para mostrar mensajes (genérica) ---
+            function showMessage(el, message, type = 'success') {
+                if (!el) return;
+                el.textContent = message;
+                el.className = `message-box ${type}`; // 'success' o 'error'
+                el.style.display = 'block';
+                // Ocultar mensaje después de 3 seg
+                setTimeout(() => { el.style.display = 'none'; }, 3000);
+            }
 
             // --- Inicialización ---
             try {
                 if (typeof supabase === 'undefined' || !supabase.createClient) { throw new Error("Supabase no cargado."); }
-                // ¡¡¡OJO!!! Pega tus claves aquí abajo, si no, peta
                 if (supabaseUrl.includes('PEGA_AQUI')) { throw new Error("¡Pega tu URL de Supabase, nano!"); }
                 supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-                console.log('[DEBUG v4] Cliente Supabase OK.');
+                console.log('[DEBUG v5] Cliente Supabase OK.');
             } catch (err) { 
-                 console.error("[DEBUG v4] Error crítico Supabase:", err);
+                 console.error("[DEBUG v5] Error crítico Supabase:", err);
                  if(loginContainer) loginContainer.style.display = 'block'; 
-                 showMessage(`Error fatal: ${err.message}`, 'error');
+                 showMessage(messageBox, `Error fatal: ${err.message}`, 'error');
                  if (loginButton) loginButton.disabled = true;
             }
 
             // --- 1. Manejador del Login (Magic Link) ---
             if (loginForm) {
-                loginForm.addEventListener('submit', async (e) => { /* (igual) */ });
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault(); 
+                    if (!supabaseClient) return;
+                    const email = emailInput.value.trim();
+                    if (!email) { showMessage(messageBox, 'Introduce un email.', 'error'); return; }
+                    loginButton.disabled = true; loginButton.textContent = 'Enviando...'; messageBox.style.display = 'none';
+                    try {
+                        console.log('[DEBUG v5] Enviando OTP para:', email);
+                        const { error } = await supabaseClient.auth.signInWithOtp({ email: email });
+                        if (error) throw error; 
+                        showMessage(messageBox, '¡Éxito! Revisa tu email (y spam) para el enlace mágico.', 'success');
+                        emailInput.value = ''; 
+                    } catch (error) {
+                        console.error('[DEBUG v5] Error en signInWithOtp:', error);
+                        showMessage(messageBox, `Error: ${error.message || 'No se pudo enviar.'}`, 'error');
+                    } finally {
+                        loginButton.disabled = false; loginButton.textContent = 'Enviar Enlace de Acceso';
+                    }
+                });
             }
             
             // --- 2. Manejador del Logout ---
             if (logoutButton) {
-                logoutButton.addEventListener('click', async () => { /* (igual) */ });
+                logoutButton.addEventListener('click', async () => { /* (igual que v4) */ });
             }
 
-            // --- ¡NUEVO! CEREBRO v4: EL "INTERRUPTOR" DEL CALENDARIO ---
-            function cargarCalendario(userId, userEmail) {
-                console.log(`[DEBUG v4] Cargando calendario para el jefe: ${userEmail}`);
-                
-                if (!calendarEl || typeof FullCalendar === 'undefined') {
-                    console.error('[DEBUG v4] ¡Fallo! No se encuentra #calendario-admin o FullCalendar.js');
-                    return;
-                }
-                
-                if (adminCalendar) {
-                    adminCalendar.refetchEvents(); // Si ya existe, solo recarga las citas
-                    return;
-                }
+            // --- 3. "Cerebro" del Calendario (Leer Citas) ---
+            function cargarCalendario(userId) {
+                console.log(`[DEBUG v5] Cargando calendario...`);
+                if (!calendarEl || typeof FullCalendar === 'undefined') { /* (igual que v4) */ return; }
+                if (adminCalendar) { adminCalendar.refetchEvents(); return; }
 
-                // ¡Aquí se crea la magia!
                 adminCalendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth', // Vista de mes
-                    locale: 'es', // ¡En Español!
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,listWeek'
-                    },
+                    initialView: 'dayGridMonth', locale: 'es',
+                    headerToolbar: { /* (igual que v4) */ },
                     
-                    // --- ¡¡AQUÍ ESTÁ EL PUTO "TRANSPLANTE DE CEREBRO"!! ---
-                    // Borramos la cita falsa y le decimos que "cargue" (`async`)
-                    // las citas de verdad desde Supabase.
+                    // ¡"Cerebro" v4! ¡Leemos citas REALES!
                     events: async function(fetchInfo) {
-                        console.log("[DEBUG v4] El calendario pide citas...");
-                        if (!supabaseClient) {
-                             console.error("Supabase no listo"); return [];
-                        }
+                        console.log("[DEBUG v5] Calendario pide citas...");
+                        if (!supabaseClient) { console.error("Supabase no listo"); return []; }
                         
                         try {
-                            // ¡AQUÍ ESTÁ LA PUTA MAGIA!
-                            // Usamos la "llave" (RLS Policy de SELECT) que creamos.
-                            // ¡Pedimos el nombre del servicio usando un JOIN!
-                            
-                            // ¡¡¡OJO!!! ¡Esto pide TODAS las citas!
-                            // En el futuro (cuando tengamos el `business_id` en el login),
-                            // filtraremos por el negocio del jefe.
+                            // ¡OJO! Seguimos usando el ID "piloto"
+                            // ¡RLS de SELECT para 'appointments' y 'services' necesaria!
                             const { data, error } = await supabaseClient
                                 .from('appointments')
-                                .select(`
-                                    customerName, 
-                                    dateTime, 
-                                    services ( name ) 
-                                `); 
-                                // ¡¡¡IMPORTANTE!!! Para que esto (el JOIN) funcione,
-                                // ¡tienes que tener una "foreign key" (llave foránea)
-                                // en tu tabla 'appointments' que apunte a 'services'!
-                                // ¡Y la tabla 'services' necesita una RLS de SELECT!
+                                .select(`customerName, dateTime, services ( name )`)
+                                .eq('business_id', MI_ID_DE_NEGOCIO_PILOTO); 
 
                             if (error) throw error;
+                            console.log("[DEBUG v5] Citas recibidas:", data);
 
-                            console.log("[DEBUG v4] Citas recibidas de Supabase:", data);
-
-                            // "Traducimos" las citas para el calendario
-                            const citasTraducidas = data.map(cita => {
-                                // Fallback por si el JOIN falla (ej: servicio borrado)
-                                const serviceName = cita.services ? cita.services.name : 'Servicio Borrado';
-                                return {
-                                    title: `${cita.customerName} (${serviceName})`, // Ej: "Nano (Corte Pelo)"
-                                    start: cita.dateTime,    // La hora que reservó
-                                    allDay: false
-                                };
-                            });
-                            
-                            return citasTraducidas; // Devolvemos las citas REALES.
+                            const citasTraducidas = data.map(cita => ({
+                                title: `${cita.customerName} (${cita.services ? cita.services.name : '???'})`,
+                                start: cita.dateTime,    
+                                allDay: false
+                            }));
+                            return citasTraducidas; 
 
                         } catch (err) {
-                            console.error('[DEBUG v4] ¡Error al leer las citas! (¿RLS? ¿JOIN?):', err.message);
-                            alert('Error al cargar las citas: ' + err.message);
-                            return []; // Devolvemos un array vacío si falla
+                            console.error('[DEBUG v5] ¡Error al leer citas! (¿RLS?):', err.message);
+                            showMessage(messageBox, 'Error al cargar las citas: ' + err.message, 'error');
+                            return []; 
                         }
                     }
                 });
+                adminCalendar.render(); 
+            }
+            
+            // --- ¡NUEVO! CEREBRO v5: "CEREBRO" DE LA SALA DE MÁQUINAS (Horarios) ---
+            
+            // 4. Cargar los horarios en los inputs
+            async function cargarPanelHorarios() {
+                console.log("[DEBUG v5] Cargando panel de horarios...");
+                if (!supabaseClient) { console.error("Supabase no listo"); return; }
+                
+                try {
+                    // ¡¡¡FALLARÁ!!! ¡Necesita la "llave" SELECT para `businesses`!
+                    const { data, error } = await supabaseClient
+                        .from('businesses')
+                        .select('horarios')
+                        .eq('id', MI_ID_DE_NEGOCIO_PILOTO)
+                        .single(); // Solo queremos un resultado
+                    
+                    if (error) throw error;
+                    if (!data || !data.horarios) { throw new Error("Horarios no encontrados"); }
+                    
+                    console.log("[DEBUG v5] Horarios recibidos:", data.horarios);
+                    
+                    // Rellenamos los 7 campos
+                    if(inputLunes) inputLunes.value = data.horarios.lunes || 'Cerrado';
+                    if(inputMartes) inputMartes.value = data.horarios.martes || 'Cerrado';
+                    if(inputMiercoles) inputMiercoles.value = data.horarios.miercoles || 'Cerrado';
+                    if(inputJueves) inputJueves.value = data.horarios.jueves || 'Cerrado';
+                    if(inputViernes) inputViernes.value = data.horarios.viernes || 'Cerrado';
+                    if(inputSabado) inputSabado.value = data.horarios.sabado || 'Cerrado';
+                    if(inputDomingo) inputDomingo.value = data.horarios.domingo || 'Cerrado';
 
-                adminCalendar.render(); // ¡Dibuja el calendario!
+                } catch (err) {
+                    console.error('[DEBUG v5] ¡Error al LEER horarios! (¿RLS?):', err.message);
+                    showMessage(messageBoxHorarios, 'Error al cargar horarios: ' + err.message, 'error');
+                }
+            }
+            
+            // 5. Guardar los horarios
+            async function guardarHorarios() {
+                console.log("[DEBUG v5] Guardando horarios...");
+                if (!supabaseClient) { console.error("Supabase no listo"); return; }
+                
+                guardarHorariosBtn.disabled = true;
+                guardarHorariosBtn.textContent = "Guardando...";
+                
+                try {
+                    // 1. Creamos el objeto "horarios" (un JSON)
+                    const nuevosHorarios = {
+                        lunes: inputLunes.value.trim(),
+                        martes: inputMartes.value.trim(),
+                        miercoles: inputMiercoles.value.trim(),
+                        jueves: inputJueves.value.trim(),
+                        viernes: inputViernes.value.trim(),
+                        sabado: inputSabado.value.trim(),
+                        domingo: inputDomingo.value.trim()
+                    };
+                    
+                    // 2. Lo "escribimos" (UPDATE) en el "almacén"
+                    // ¡¡¡FALLARÁ!!! ¡Necesita la "llave" UPDATE para `businesses`!
+                    const { error } = await supabaseClient
+                        .from('businesses')
+                        .update({ horarios: nuevosHorarios }) // Actualiza solo la columna "horarios"
+                        .eq('id', MI_ID_DE_NEGOCIO_PILOTO); // Del negocio piloto
+                    
+                    if (error) throw error;
+                    
+                    console.log("[DEBUG v5] ¡Horarios guardados!");
+                    showMessage(messageBoxHorarios, '¡Horarios guardados con éxito!', 'success');
+                
+                } catch (err) {
+                    console.error('[DEBUG v5] ¡Error al GUARDAR horarios! (¿RLS?):', err.message);
+                    showMessage(messageBoxHorarios, 'Error al guardar: ' + err.message, 'error');
+                } finally {
+                    guardarHorariosBtn.disabled = false;
+                    guardarHorariosBtn.textContent = "Guardar Horarios";
+                }
+            }
+            
+            // 6. Conectamos el botón de guardar
+            if (guardarHorariosBtn) {
+                guardarHorariosBtn.addEventListener('click', guardarHorarios);
             }
 
-
-            // --- 4. El "Portero" (onAuthStateChange - ¡ACTUALIZADO!) ---
+            // --- 7. El "Portero" (onAuthStateChange - ¡ACTUALIZADO!) ---
             if (supabaseClient) {
                 supabaseClient.auth.onAuthStateChange((event, session) => {
-                    console.log(`[DEBUG v4] Evento Auth Recibido: ${event}`, session);
+                    console.log(`[DEBUG v5] Evento Auth Recibido: ${event}`, session);
                     
                     if (session && session.user) {
                         // --- ESTADO: LOGUEADO ---
-                        console.log('[DEBUG v4] ¡SESIÓN DETECTADA!', session.user.email);
+                        console.log('[DEBUG v5] ¡SESIÓN DETECTADA!', session.user.email);
                         loginContainer.style.display = 'none';
                         dashboardContainer.style.display = 'block';
                         
-                        if (userEmail) {
-                            userEmail.textContent = session.user.email;
-                        }
+                        if (userEmail) userEmail.textContent = session.user.email;
                         
-                        // ¡El "portero" llama al "interruptor" del calendario!
-                        cargarCalendario(session.user.id, session.user.email);
+                        // ¡El "portero" llama a los DOS "interruptores"!
+                        cargarCalendario(session.user.id);
+                        cargarPanelHorarios(); // ¡NUEVO!
                         
                     } else {
                         // --- ESTADO: NO LOGUEADO ---
-                        console.log('[DEBUG v4] NO hay sesión detectada.');
+                        console.log('[DEBUG v5] NO hay sesión detectada.');
                         loginContainer.style.display = 'block';
                         dashboardContainer.style.display = 'none';
                     }
